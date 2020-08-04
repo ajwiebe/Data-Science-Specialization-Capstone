@@ -1,3 +1,8 @@
+unigram_cover <- readRDS("unigram_cover.rds")
+bigram_words <- readRDS("bigram_words.rds")
+trigram_words <- readRDS("trigram_words.rds")
+quadgram_words <- readRDS("quadgram_words.rds")
+
 word_predictor <- function(input) {
   input <- tibble(text = input)
   replace <-  "[^[:alpha:][:space:]]*"
@@ -34,3 +39,4 @@ word_predictor <- function(input) {
     return(as.character(out[1,2]))
   }  
 }
+

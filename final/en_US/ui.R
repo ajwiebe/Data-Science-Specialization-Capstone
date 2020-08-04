@@ -1,4 +1,20 @@
 source("Model Final.R")
+library(dplyr)
+library(ggplot2)
+library(tm)
+library(corpus)
+library(data.table)
+library(tokenizers)
+library(tidytext)
+library(stringr)
+library(ngram)
+library(tidyr)
+library(shiny)
+unigram_cover <- readRDS("unigram_cover.rds")
+bigram_words <- readRDS("bigram_words.rds")
+trigram_words <- readRDS("trigram_words.rds")
+quadgram_words <- readRDS("quadgram_words.rds")
+
 ui <- shinyUI(fluidPage(
   titlePanel("Text Predictor"), p("This app takes words from the textbox below and predicts the word to follow"),
   sidebarLayout(
@@ -23,7 +39,8 @@ ui <- shinyUI(fluidPage(
                img(src = "trigrams.png", width = 1100, height = 500)), 
       tabPanel("Most Common Quadgrams",
                br(), 
-               img(src = "quadgrams.png", width = 1300, height = 500))
+               img(src = "quadgrams.png", width = 1300, height = 500)),
+      options(shiny.sanitize.errors = FALSE)
       )
     )
   ))

@@ -1,0 +1,57 @@
+---
+title: "Text Predictor App Pitch"
+subtitle: "Capstone Project for the Johns Hopkins University Data Science Coursera Specialization"
+author: "Alex Wiebe"
+date: "8/4/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+***
+<font size="5">This application takes an input of text of any length, and predict the following word.</font> 
+<font size = "5">It also:</font>
+
+- <font size="3">Displays some common words and phrases that the model predicts on</font> 
+- <font size="3">If the given word or phrase is not recognized by the application, it suggests the most common word in the training data, which in this case is the word "I'm"</font> 
+``` {r message = F, warning = F}
+library(dplyr)
+library(ggplot2)
+bigram_cover_90 <- readRDS("bigram_cover_90.rds")
+bigram_cover_90 %>% top_n(20, proportion) %>% 
+  mutate(bigram = reorder(bigram, proportion)) %>%
+  ggplot(aes(bigram, proportion)) + coord_flip() +
+  geom_col() + xlab(NULL) + geom_bar(fill = "orange", color = "black", stat = "identity" )
+```
+
+##The Model 
+This apllication uses a fuction that predicts using ngrams from the training data.
+Some features include: 
+
+- A backoff approach to writing the function
+- Use of bigrams, trigrams, or quadgrams, depending on input text
+- Use of a combination of the above, should the input text be longer than three words
+- A default return of the most common word in the model ("I'm")
+- A compact size that is able to run on most devices
+- All words are predicted in lowercase lettering
+- The application currently operates in the English language only
+
+##The Data
+This model was built using a subset of text from Twitter, blogs, and the news. 
+
+- Ten percent of each type of data was used to train the model 
+- This created the optimal size for both speed and accuracy
+- A corpus was created first, and the ngrams were derived from there
+- Profanity and slurs were omitted from the data so that they would not be predicted
+- Symbols were removed and all words were coerced to lowercase
+
+##Possible Future Improvements
+With more available resources, this application could be expanded to include more phrases in its model.
+Other areas of growth include: 
+
+- Expanding the additional information provided by the application 
+- Possible inclusion of quantitative prediction accuracy statistics 
+- Increasing the number of words predicted for a given input
+- Expanding the sources of initial data used, potentially including text messages and emails
