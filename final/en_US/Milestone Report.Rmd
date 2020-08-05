@@ -1,0 +1,123 @@
+---
+title: "Milestone Report"
+author: "Alex Wiebe"
+date: "8/5/2020"
+output: html_document
+---
+#Capstone Milestone Report
+##Executive Summary
+This report serves to outline the cleaning and exploration process of the data. Data was examined and cleaned for relevant information. This includes removing unnecessary words and symbols, tokenizing words and phrases, and determining the frequency with which they appear. 
+##Cleaning the Data
+The files were loaded into R and the lines of the files were read. The wordcount was taken from each file, and a summary of the lines was also produced. 
+``` {r, eval = F, echo = T}
+twit <- file("en_US.twitter.txt")
+twit_lines <- readLines(twit)
+blog <- file("en_US.blogs.txt")
+blog_lines <- readLines(blog)
+news <- file("en_US.news.txt")
+news_lines <- readLines(news)
+
+twit_words <- wordcount(twit_lines, sep = " ")
+blog_words <- wordcount(blog_lines, sep = " ")
+news_words <- wordcount(news_lines, sep = " ")
+word_table <- cbind(twit_words, blog_words, news_words)
+saveRDS(word_table, "/Users/ajwiebe/Capstone Project/final/en_US/word_table.rds")
+```
+
+```{r, echo = T, eval = T}
+word_table <- readRDS("/Users/ajwiebe/Capstone Project/final/en_US/word_table.rds")
+print(word_table)
+```
+
+``` {r, echo = T, eval = F}
+summary(length(twit_lines))
+summary(length(blog_lines))
+summary(length(news_lines))
+summary_table <- rbind(summary(length(blog_lines)), summary(length(twit_lines)), summary(length(news_lines)))
+saveRDS(summary_table, "/Users/ajwiebe/Capstone Project/final/en_US/summary_table.rds")
+```
+
+```{r, echo = T, eval = T}
+summary_table <- readRDS("/Users/ajwiebe/Capstone PRoject/final/en_US/summary_table.rds")
+print(summary_table)
+```
+The lines of text from each dataset were then converted into a data frame and subsetted accordingly. Ten percent of each type of data was used. The subsetted data was then unified in order to have a complete repository of the training data. The repository was cleaned in order to include the source of each line of text (Twitter, a blog, or the news). 
+``` {r, eval=F, echo =T}
+##The total data frame
+data.frame(type = c("twitter", "blog", "news"), words = c(length(twit_words), length(blog_words), length(news_words)))
+
+twit_df <- data.frame(text = twit_lines)
+blogs_df <- data.frame(text = blog_lines)
+news_df <- data.frame(text = news_lines)
+
+##Subsets from twitter
+set.seed(25)
+twit_train2 <- twit_df %>% sample_n(., nrow(twit_df)*0.1)
+##Subset from blogs 
+blog_train2 <- blogs_df %>% sample_n(., nrow(blogs_df)*0.1)
+##Subset from news
+news_train2 <- news_df %>% sample_n(., nrow(news_df)*0.1)
+
+##Make the repository 
+repo_samp <- bind_rows(mutate(twit_train2, source = "twit_df"), mutate(blog_train2, source = "blogs_df"), mutate(news_train2, source = "news_df"))
+repo_samp$source <- as.factor(repo_samp$source)
+```
+Swear words, extraneous spaces, urls, and any word with more than three letters in a row were then removed. 
+```{r, eval = F, echo = T}
+swear_words <- tibble(line = 1:13, text = swears)
+tidy_swears <- swear_words %>% unnest_tokens(word, text)
+
+replace_reg <- "[^[:alpha:][:space:]]*"
+replace_url <- "http[^[:space:]]*"
+replace_aaa <- "\\b(?=\\w*(\\w)\\1)\\w+\\b"
+
+##Clean the repo
+clean_samp <- repo_samp %>% mutate(text = str_replace_all(text, replace_reg, "")) %>%
+  mutate(text = str_replace_all(text, replace_url, "")) %>%
+  mutate(text = str_replace_all(text, replace_aaa, "")) %>% 
+  mutate(text = iconv(text, "ASCII//TRANSLIT"))
+```
+The words were tokenized in a clean repository with no stop words. 
+``` {r, echo = F, eval = F}
+tidy_repo <- clean_samp %>%
+  unnest_tokens(word, text) %>% anti_join(stop_words)
+
+saveRDS(clean_samp, "/Users/ajwiebe/Capstone Project/final/en_US/clean_samp.rds")
+```
+
+```{r, echo = T, eval = T}
+clean_samp <- readRDS("/Users/ajwiebe/Capstone Project/final/en_US/clean_samp.rds")
+head(clean_samp)
+tidy_repo <- readRDS("/Users/ajwiebe/Capstone Project/final/en_US/tidy_repo.rds")
+head(tidy_repo)
+```
+##Exploratory Data Analysis
+The tidy repository was organized into an object that contains each tokenized word that covers up to ninty percent of the data, the frequency of each word's appearance, its coverage, and proportion compared to the rest of the data. 
+```{r, eval = F, echo = T}
+cover_90 <- tidy_repo %>%
+  count(word) %>%  
+  mutate(proportion = n / sum(n)) %>%
+  arrange(desc(proportion)) %>%  
+  mutate(coverage = cumsum(proportion)) %>%
+  filter(coverage <= 0.9)
+```
+
+```{r, eval = T, echo = T}
+cover_90 <- readRDS("/Users/ajwiebe/Capstone Project/final/en_US/cover_90.rds")
+head(cover_90)
+```
+Some preliminary plots were made to illustrate the findings in the data.
+```{r, echo = T, eval = T}
+library(ggplot2)
+library(dplyr)
+cover_90 %>%
+  top_n(20, proportion) %>%
+  mutate(word = reorder(word, proportion)) %>%
+  ggplot(aes(word, proportion)) +
+  geom_col() +
+  xlab(NULL) + geom_bar(fill = "pink", color = "black", stat = "identity")
+```
+It was necessary to remove all stop words because otherwise, the plot would have almost entirely been stop words.
+
+##Application Plan 
+This application is going to use a function as a model to predict the following word, when passed a single word or a string of words. It will use five clean sets of data containing ngrams to predict words. For example, if passed three words, it should predict the fourth word based on a set of quadgrams from the training data. The application will also display various statistics about the data. It should be compact enough to use on a range of devices and relatively accurate in terms of words prediction. 

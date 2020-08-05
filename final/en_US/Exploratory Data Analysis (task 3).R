@@ -29,7 +29,7 @@ repo_samp <- bind_rows(mutate(twit_train2, source = "twit_df"), mutate(blog_trai
 repo_samp$source <- as.factor(repo_samp$source)
 
 ##Getting rid of the bad stuff
-swears <- swears <- c("ass", "bitch", "cunt", "dick", "fuck", "nigger", "nigga", "retard", "shit", "damn", "cock", "coon", "fag")
+swears <- c("ass", "bitch", "cunt", "dick", "fuck", "nigger", "nigga", "retard", "shit", "damn", "cock", "coon", "fag")
 swear_words <- tibble(line = 1:13, text = swears)
 tidy_swears <- swear_words %>% unnest_tokens(word, text)
 
@@ -99,7 +99,7 @@ bigram_cover_90 %>%
 
 saveRDS(bigram_cover_90, "/Users/ajwiebe/Capstone Project/final/en_US/bigram_cover_90.rds")
 
-##TRIGRAMS, finally
+##TRIGRAMS
 trigrams <- clean_samp %>% unnest_tokens(trigram, text, n = 3, token = "ngrams")
 
 trigram_cover_90 <- trigrams %>%

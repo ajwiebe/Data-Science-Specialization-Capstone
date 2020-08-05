@@ -121,7 +121,7 @@ test_func4 <- function(input) {
   }
 }
 
-##Final Model (probably)
+##Final Model
 word_predictor <- function(input) {
   input <- tibble(text = input)
   replace <-  "[^[:alpha:][:space:]]*"
@@ -160,6 +160,7 @@ word_predictor <- function(input) {
 }
 
 ##Some Graphs 
+##Unigram
 png("unigrams.png", width = 700, height = 500)
 cover_90 <- readRDS("cover_90.rds")
 cover_90 %>% top_n(20, proportion) %>%
@@ -168,6 +169,7 @@ cover_90 %>% top_n(20, proportion) %>%
   geom_col() + xlab(NULL) + geom_bar(fill = "red", color = "black", stat = "identity")
 dev.off()
 
+##Bigram
 png("bigrams.png", width = 900, height = 500)
 bigram_cover_90 <- readRDS("bigram_cover_90.rds")
 bigram_cover_90 %>% top_n(20, proportion) %>% 
@@ -176,6 +178,7 @@ bigram_cover_90 %>% top_n(20, proportion) %>%
   geom_col() + xlab(NULL) + geom_bar(fill = "orange", color = "black", stat = "identity" )
 dev.off()
 
+##Trigram
 png("trigrams.png", width = 1100, height = 500)
 trigram_cover_90 <- readRDS("trigram_cover_90.rds")
 trigram_cover_90 %>% top_n(20,proportion) %>%
@@ -184,6 +187,7 @@ trigram_cover_90 %>% top_n(20,proportion) %>%
   geom_col() + xlab(NULL) + geom_bar(fill = "yellow", color = "black", stat = "identity")
 dev.off()
 
+##Quadgram
 png("quadgrams.png", width = 1300, height = 500)
 quadgram_cover_90 <- readRDS("quadgram_cover_90.rds")
 quadgram_cover_90 %>% top_n(20, proportion) %>%
